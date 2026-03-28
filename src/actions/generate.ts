@@ -3,20 +3,11 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { supabaseAdmin } from '@/lib/supabase'
 
-
-import { getCloudflareContext } from '@opennextjs/cloudflare';
-
 export async function generateSiteAction(formData: FormData) {
-  let apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    try {
-      const ctx = await getCloudflareContext();
-      apiKey = (ctx.env as Record<string, string>).GEMINI_API_KEY;
-    } catch (_e) {}
-  }
+  const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey || apiKey.trim() === '') {
-    return { error: 'Error: GEMINI_API_KEY is completely missing in Cloudflare environment variables! Please check your Cloudflare Dashboard bindings.' };
+    return { error: 'Server Error: GEMINI_API_KEY environment variable is not set. Please add it in the Cloudflare Pages dashboard under Settings → Environment Variables, then redeploy.' };
   }
   const genAI = new GoogleGenerativeAI(apiKey);
 
