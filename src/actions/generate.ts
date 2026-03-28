@@ -8,17 +8,22 @@ export async function generateSiteAction(formData: FormData) {
   // In Cloudflare Workers, secrets live on the env binding, not process.env.
   // getCloudflareContext({async:true}) is the correct way to access them in Server Actions.
   let apiKey = process.env.GEMINI_API_KEY;
+  let debugInfo = `process.env.GEMINI_API_KEY=${apiKey ? 'FOUND' : 'NOT FOUND'} | `;
+
   if (!apiKey) {
     try {
       const ctx = await getCloudflareContext({ async: true });
-      apiKey = (ctx.env as Record<string, string>).GEMINI_API_KEY;
-    } catch (_e) {
-      // Not in Cloudflare environment (local dev), apiKey stays undefined
+      const cfKey = (ctx.env as Record<string, string>).GEMINI_API_KEY;
+      const cfEnvKeys = Object.keys(ctx.env as object).join(',');
+      debugInfo += `ctx=${!!ctx} | cfKey=${cfKey ? 'FOUND' : 'NOT FOUND'} | cfEnvKeys=[${cfEnvKeys}]`;
+      if (cfKey) apiKey = cfKey;
+    } catch (err) {
+      debugInfo += `getCloudflareContext threw: ${String(err)}`;
     }
   }
 
   if (!apiKey || apiKey.trim() === '') {
-    return { error: 'Server Error: GEMINI_API_KEY is not set. Add it in Cloudflare Dashboard → Workers & Pages → buildersaas → Settings → Variables and Secrets, then redeploy.' };
+    return { error: `DEBUG: ${debugInfo}` };
   }
   const genAI = new GoogleGenerativeAI(apiKey);
 
