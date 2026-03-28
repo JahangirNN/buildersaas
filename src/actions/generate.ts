@@ -21,7 +21,7 @@ export async function generateSiteAction(formData: FormData) {
   try {
     // 1. Generate Content via Gemini
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       generationConfig: {
         responseMimeType: 'application/json'
       }
@@ -82,7 +82,8 @@ Business/Person Name: ${name}`;
     }
 
     return { success: true, site: siteRecord };
-  } catch (err: any) {
-    return { error: err.message || 'An unexpected error occurred in AI generation.' };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'An unexpected error occurred in AI generation.';
+    return { error: message };
   }
 }

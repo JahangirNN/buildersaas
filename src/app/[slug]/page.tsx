@@ -57,7 +57,7 @@ export default async function PublicSite({
   // Fallback for other types
   return (
     <div className="min-h-screen bg-gray-900 text-emerald-400 p-8 font-mono overflow-auto">
-      <h1 className="text-xl text-white mb-4">// RAW JSON DATA (Template Phase 2)</h1>
+      <h1 className="text-xl text-white mb-4">RAW JSON DATA (Template Phase 2)</h1>
       <pre className="p-4 bg-gray-800 rounded-lg whitespace-pre-wrap text-sm">
         {JSON.stringify(site, null, 2)}
       </pre>

@@ -76,7 +76,7 @@ export default function EcommerceTemplate({ content, whatsapp_number }: Ecommerc
       <section id="about" className="py-16 px-8 md:px-16 bg-gray-50 border-y border-gray-100">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-xl md:text-2xl text-gray-700 leading-relaxed font-medium">
-            "{about}"
+            &quot;{about}&quot;
           </p>
         </div>
       </section>

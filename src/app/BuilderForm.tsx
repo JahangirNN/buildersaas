@@ -8,9 +8,31 @@ import PortfolioTemplate from '@/components/templates/PortfolioTemplate'
 import EcommerceTemplate from '@/components/templates/EcommerceTemplate'
 import { getWhatsAppLink } from '@/lib/whatsapp'
 
+
+interface SiteResult {
+  slug: string;
+  type: string;
+  whatsapp_number: string;
+  content: {
+    hero: {
+      headline: string;
+      subheadline: string;
+      image_url: string;
+    };
+    about: string;
+    items: Array<{
+      name: string;
+      desc: string;
+      price: string;
+      image_url: string;
+    }>;
+    theme_color: string;
+  };
+}
+
 export default function BuilderForm() {
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<null | SiteResult>(null)
   const [errorMsg, setErrorMsg] = useState('')
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop')
 
