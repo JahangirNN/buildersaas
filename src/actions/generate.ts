@@ -4,8 +4,22 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { supabaseAdmin } from '@/lib/supabase'
 
 
+import { getCloudflareContext } from '@opennextjs/cloudflare';
+
 export async function generateSiteAction(formData: FormData) {
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+  let apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    try {
+      const ctx = await getCloudflareContext();
+      apiKey = (ctx.env as any).GEMINI_API_KEY;
+    } catch (e) {}
+  }
+
+  if (!apiKey || apiKey.trim() === '') {
+    return { error: 'Error: GEMINI_API_KEY is completely missing in Cloudflare environment variables! Please check your Cloudflare Dashboard bindings.' };
+  }
+  const genAI = new GoogleGenerativeAI(apiKey);
+
   const name = formData.get('name') as string;
   const whatsapp = formData.get('whatsapp') as string;
   const type = formData.get('type') as string;
