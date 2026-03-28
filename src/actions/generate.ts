@@ -11,8 +11,8 @@ export async function generateSiteAction(formData: FormData) {
   if (!apiKey) {
     try {
       const ctx = await getCloudflareContext();
-      apiKey = (ctx.env as any).GEMINI_API_KEY;
-    } catch (e) {}
+      apiKey = (ctx.env as Record<string, string>).GEMINI_API_KEY;
+    } catch (_e) {}
   }
 
   if (!apiKey || apiKey.trim() === '') {
