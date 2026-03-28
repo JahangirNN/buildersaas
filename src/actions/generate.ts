@@ -4,9 +4,8 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { supabaseAdmin } from '@/lib/supabase'
 
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-
 export async function generateSiteAction(formData: FormData) {
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
   const name = formData.get('name') as string;
   const whatsapp = formData.get('whatsapp') as string;
   const type = formData.get('type') as string;
@@ -21,7 +20,7 @@ export async function generateSiteAction(formData: FormData) {
   try {
     // 1. Generate Content via Gemini
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3.1-flash-lite',
       generationConfig: {
         responseMimeType: 'application/json'
       }
