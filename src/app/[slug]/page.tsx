@@ -5,8 +5,6 @@ import EcommerceTemplate from '@/components/templates/EcommerceTemplate'
 import { Lock } from 'lucide-react'
 import { getWhatsAppLink } from '@/lib/whatsapp'
 
-export const runtime = 'edge';
-
 export default async function PublicSite({ 
   params 
 }: { 
