@@ -2,12 +2,23 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { supabaseAdmin } from '@/lib/supabase'
+import { getCloudflareContext } from '@opennextjs/cloudflare'
 
 export async function generateSiteAction(formData: FormData) {
-  const apiKey = process.env.GEMINI_API_KEY;
+  // In Cloudflare Workers, secrets live on the env binding, not process.env.
+  // getCloudflareContext({async:true}) is the correct way to access them in Server Actions.
+  let apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    try {
+      const ctx = await getCloudflareContext({ async: true });
+      apiKey = (ctx.env as Record<string, string>).GEMINI_API_KEY;
+    } catch (_e) {
+      // Not in Cloudflare environment (local dev), apiKey stays undefined
+    }
+  }
 
   if (!apiKey || apiKey.trim() === '') {
-    return { error: 'Server Error: GEMINI_API_KEY environment variable is not set. Please add it in the Cloudflare Pages dashboard under Settings → Environment Variables, then redeploy.' };
+    return { error: 'Server Error: GEMINI_API_KEY is not set. Add it in Cloudflare Dashboard → Workers & Pages → buildersaas → Settings → Variables and Secrets, then redeploy.' };
   }
   const genAI = new GoogleGenerativeAI(apiKey);
 
