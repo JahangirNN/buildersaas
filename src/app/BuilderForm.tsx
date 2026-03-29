@@ -123,7 +123,7 @@ export default function BuilderForm() {
                 </div>
                 <div className="flex-1 flex flex-col min-h-[120px]">
                   <label className="block text-sm font-bold mb-2 text-gray-800">Brand Biography & Mission</label>
-                  <textarea name="bio" defaultValue={(result?.content as Record<string, any>)?.ABOUT_SECTION || ''} required className="w-full border-2 border-transparent bg-gray-50 p-3 rounded-xl outline-none focus:border-black focus:bg-white transition-all shadow-sm flex-1 resize-none text-sm" placeholder="Describe your philosophy, products, or services." />
+                  <textarea name="bio" defaultValue={(result?.content as Record<string, unknown>)?.ABOUT_SECTION as string || ''} required className="w-full border-2 border-transparent bg-gray-50 p-3 rounded-xl outline-none focus:border-black focus:bg-white transition-all shadow-sm flex-1 resize-none text-sm" placeholder="Describe your philosophy, products, or services." />
                 </div>
 
                 <button

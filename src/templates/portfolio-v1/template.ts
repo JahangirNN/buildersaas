@@ -1,10 +1,8 @@
-export interface TemplateData {
-  [key: string]: string | number | boolean | any[] | undefined | Record<string, any>;
-}
+import { PortfolioData } from './schema';
 
 const s = (v: unknown): string => String(v || '');
 
-export function portfolioV1Template(data: TemplateData): string {
+export function portfolioV1Template(data: PortfolioData): string {
   // Destructure with fallbacks
   const themeColor = s(data.THEME_COLOR || '#CA8A04');
   const heroHeadline = s(data.HERO_HEADLINE || 'Welcome to my world.');
@@ -16,22 +14,26 @@ export function portfolioV1Template(data: TemplateData): string {
   // Build the product list HTML dynamically
   let productsHtml = '';
   if (data.PRODUCT_LIST && Array.isArray(data.PRODUCT_LIST) && data.PRODUCT_LIST.length > 0) {
-    productsHtml = data.PRODUCT_LIST.map((product, i) => `
+    productsHtml = data.PRODUCT_LIST.map((p, i) => {
+      const product = p as Record<string, unknown>;
+      return `
       <article class="product-card">
           <div class="product-img-box">
-              <img src="${product.image_url || '/templates/portfolio-v1/story_1.jpg'}" alt="${product.name}" loading="lazy" data-field="PRODUCT_${i}_IMAGE">
+              <img src="${s(product.image_url || '/templates/portfolio-v1/story_1.jpg')}" alt="${s(product.name)}" loading="lazy" data-field="PRODUCT_${i}_IMAGE">
           </div>
           <div class="product-info">
               <span class="product-type">Featured Work</span>
-              <h3 class="product-title" data-field="PRODUCT_${i}_NAME">${product.name}</h3>
-              <p class="product-desc" data-field="PRODUCT_${i}_DESC">${product.desc}</p>
-              <button class="btn-cta add-to-cart" data-product="${product.name}" style="width:100%; margin-top: auto; justify-content: space-between;">
-                  Add to Cart <span data-field="PRODUCT_${i}_PRICE">${product.price}</span>
+              <h3 class="product-title" data-field="PRODUCT_${i}_NAME">${s(product.name)}</h3>
+              <p class="product-desc" data-field="PRODUCT_${i}_DESC">${s(product.desc)}</p>
+              <button class="btn-cta add-to-cart" data-product="${s(product.name)}" style="width:100%; margin-top: auto; justify-content: space-between;">
+                  Add to Cart <span data-field="PRODUCT_${i}_PRICE">${s(product.price)}</span>
               </button>
           </div>
       </article>
-    `).join('');
-  } else {
+    `;
+    }).join('');
+  }
+ else {
     // Default placeholder product if empty
     productsHtml = `
       <article class="product-card">

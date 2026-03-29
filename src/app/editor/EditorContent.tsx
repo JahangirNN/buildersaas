@@ -597,13 +597,13 @@ export default function EditorContent() {
                       {field.type === 'image' ? (
                         <ImageUpload 
                           label={field.label} 
-                          value={content[field.id] || field.value} 
+                          value={(content[field.id] as string) || (field.value as string)}
                           onChange={val => updateField(field.id, val)}
                         />
                       ) : (
                         <Field 
                           label={field.label} 
-                          value={content[field.id] || field.value} 
+                          value={(content[field.id] as string) || (field.value as string)} 
                           onChange={val => updateField(field.id, val)} 
                           multiline={field.id.includes('DESC') || field.id.includes('SECTION') || field.id.includes('HEADLINE')}
                           rows={field.id.includes('SECTION') ? 4 : 2}
@@ -636,7 +636,7 @@ export default function EditorContent() {
                   </div>
                 ))}
                 <button
-                  onClick={() => setContent(prev => ({ ...prev, PRODUCT_LIST: [...(prev.PRODUCT_LIST || []), { name: '', desc: '', price: '', image_url: '' }] }))}
+                  onClick={() => setContent(prev => ({ ...prev, PRODUCT_LIST: [...(prev.PRODUCT_LIST as Record<string, unknown>[] || []), { name: '', desc: '', price: '', image_url: '' }] }))}
                   className="w-full py-2.5 rounded-xl border border-dashed border-white/10 text-white/30 text-xs font-semibold flex items-center justify-center gap-2 hover:border-white/20 hover:text-white/50 transition"
                 >
                   <Plus size={14} /> Add Product
@@ -645,8 +645,8 @@ export default function EditorContent() {
             </Section>
 
             <Section title="Brand Assets" icon={ImageIcon} defaultOpen={false}>
-              <ImageUpload value={content.LOGO_URL} onChange={val => updateField('LOGO_URL', val)} label="Logo" />
-              <ImageUpload value={content.HERO_BG_IMAGE} onChange={val => updateField('HERO_BG_IMAGE', val)} label="Hero Background Image" />
+              <ImageUpload value={content.LOGO_URL as string} onChange={val => updateField('LOGO_URL', val)} label="Logo" />
+              <ImageUpload value={content.HERO_BG_IMAGE as string} onChange={val => updateField('HERO_BG_IMAGE', val)} label="Hero Background Image" />
             </Section>
 
             <Section title="Style & Settings" icon={Palette} defaultOpen={false}>

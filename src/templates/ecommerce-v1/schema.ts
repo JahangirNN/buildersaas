@@ -1,0 +1,40 @@
+import { z } from 'zod';
+
+export const ecommerceSchema = z.object({
+  name: z.string().default('Abrra Nature Products'),
+  THEME_COLOR: z.string().default('#10b981'),
+  LOGO_URL: z.string().default('/templates/ecommerce-v1/assets/logo.png'),
+  HERO_HEADLINE: z.string().default('Handcrafted\\n<em>with Herbs</em>\\n& Nature'),
+  SUB_HEADLINE: z.string().default('Pure care for your hair & skin — free from harsh chemicals...'),
+  ABOUT_SECTION: z.string().default('At Abrra, we believe nature has all the answers...'),
+  ABOUT_TITLE: z.string().default('Born from nature,\\n<em>crafted with care</em>'),
+  ABOUT_IMAGE_1: z.string().optional(),
+  ABOUT_IMAGE_2: z.string().optional(),
+  HERO_BG_IMAGE: z.string().default('/templates/ecommerce-v1/assets/gallery1_new.png'),
+  CTA_PRIMARY_TEXT: z.string().default('DM to Order'),
+  CTA_SECONDARY_TEXT: z.string().default('View Products'),
+  CTA_NAV_TEXT: z.string().default('Order Now'),
+  WHATSAPP_LINK: z.string().optional(),
+  CONTACT_PHONE: z.string().default('+91 99203 55666'),
+  INSTAGRAM_LINK: z.string().default('https://www.instagram.com/abrra.natureproducts'),
+  WHY_1_TITLE: z.string().default('Chemical Free'),
+  WHY_1_DESC: z.string().default('Zero sulphates, zero parabens...'),
+  WHY_2_TITLE: z.string().default('Handcrafted'),
+  WHY_2_DESC: z.string().default('Every product is made in small batches...'),
+  WHY_3_TITLE: z.string().default('Best Herbs'),
+  WHY_3_DESC: z.string().default('Sourced from the finest botanical traditions...'),
+  WHY_4_TITLE: z.string().default('Quality Delivery'),
+  WHY_4_DESC: z.string().default('We ship far and wide...'),
+  CONTACT_TITLE: z.string().default('Ready to go\\n<em>natural?</em>'),
+  CONTACT_DESC: z.string().default('Place your order directly via WhatsApp...'),
+  FOOTER_TAGLINE: z.string().default('Quality & Care 🌿'),
+  FOOTER_CREDITS: z.string().default('© 2026 Abrra Nature Products. All rights reserved.'),
+  PRODUCT_LIST: z.array(z.object({
+    name: z.string().default('Herbal Product'),
+    desc: z.string().default('Description...'),
+    price: z.string().default('499'),
+    image_url: z.string().optional(),
+  })).default([]),
+}).passthrough();
+
+export type EcommerceData = z.infer<typeof ecommerceSchema>;

@@ -1,10 +1,8 @@
-export interface TemplateData {
-  [key: string]: string | number | boolean | any[] | undefined | Record<string, any>;
-}
+import { EcommerceData } from './schema';
 
 const s = (v: unknown): string => String(v || '');
 
-export function ecommerceV1Template(data: TemplateData): string {
+export function ecommerceV1Template(data: EcommerceData): string {
   const themeColor = s(data.THEME_COLOR || '#10b981');
   const heroHeadline = s(data.HERO_HEADLINE || 'Handcrafted\\n<em>with Herbs</em>\\n& Nature');
   const subHeadline = s(data.SUB_HEADLINE || 'Pure care for your hair & skin — free from harsh chemicals, made with love from the finest Indian herbs.');
@@ -18,24 +16,27 @@ export function ecommerceV1Template(data: TemplateData): string {
 
   let productsHtml = '';
   if (data.PRODUCT_LIST && Array.isArray(data.PRODUCT_LIST) && data.PRODUCT_LIST.length > 0) {
-    productsHtml = data.PRODUCT_LIST.map((product, i) => `
+    productsHtml = data.PRODUCT_LIST.map((p, i) => {
+      const product = p as Record<string, unknown>;
+      return `
       <div class="product-card">
         <div class="prod-img-wrap">
-          <img src="${product.image_url || '/templates/ecommerce-v1/assets/gallery1_new.png'}" alt="${product.name}" data-field="PRODUCT_${i}_IMAGE"/>
+          <img src="${s(product.image_url || '/templates/ecommerce-v1/assets/gallery1_new.png')}" alt="${s(product.name)}" data-field="PRODUCT_${i}_IMAGE"/>
           <div class="prod-overlay">
-            <button class="prod-order add-to-cart" data-name="${product.name}" data-price="${product.price}" data-img="${product.image_url || '/templates/ecommerce-v1/assets/gallery1_new.png'}">Add to Cart</button>
+            <button class="prod-order add-to-cart" data-name="${s(product.name)}" data-price="${s(product.price)}" data-img="${s(product.image_url || '/templates/ecommerce-v1/assets/gallery1_new.png')}">Add to Cart</button>
           </div>
         </div>
         <div class="prod-info">
-          <h3 data-field="PRODUCT_${i}_NAME">${product.name}</h3>
-          <p data-field="PRODUCT_${i}_DESC">${product.desc}</p>
+          <h3 data-field="PRODUCT_${i}_NAME">${product.name as string}</h3>
+          <p data-field="PRODUCT_${i}_DESC">${product.desc as string}</p>
           <div class="prod-footer">
-            <span class="price" data-field="PRODUCT_${i}_PRICE">${product.price}</span>
-            <button class="prod-cta add-to-cart" data-name="${product.name}" data-price="${product.price}" data-img="${product.image_url || '/templates/ecommerce-v1/assets/gallery1_new.png'}">Add to Cart</button>
+            <span class="price" data-field="PRODUCT_${i}_PRICE">${product.price as string}</span>
+            <button class="prod-cta add-to-cart" data-name="${s(product.name)}" data-price="${s(product.price)}" data-img="${s(product.image_url || '/templates/ecommerce-v1/assets/gallery1_new.png')}">Add to Cart</button>
           </div>
         </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
   } else {
     productsHtml = `
       <div class="product-card">

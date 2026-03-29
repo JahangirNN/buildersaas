@@ -10,6 +10,8 @@ An AI-powered Website Builder SaaS built with Next.js 15, deployed on Cloudflare
 | :--- | :--- |
 | `C:\Users\Administrator\WorkPlace\connect` | Source HTML templates (raw, unconverted) |
 | `buildersaas/src/templates/[id]/template.ts` | Converted template logic (TS string renderer) |
+| `buildersaas/src/templates/[id]/schema.ts` | Zod schema for template validation & defaults |
+| `buildersaas/src/templates/registry.ts` | Central Template Registry (Factory Pattern) |
 | `buildersaas/public/templates/[id]` | Static assets (CSS, JS, images) for each template |
 | `buildersaas/src/app/editor/EditorContent.tsx` | Dynamic visual editor (unified state + field discovery) |
 | `buildersaas/src/lib/editorInjection.ts` | Iframe script for [data-field] discovery & event sync |
@@ -59,7 +61,8 @@ All templates must use the format: `[category]-v[version]`
   ]
 }
 ```
-> **Self-Documenting Standard**: Templates must use `data-field="KEY"` on elements. The editor dynamically discovers these keys and renders sidebar controls automatically. No React changes needed for new fields.
+> **Self-Documenting Standard**: Templates must use `data-field="KEY"` on elements. The editor dynamically discovers these keys and renders sidebar controls automatically.
+> **Validation Standard**: Every template must have a corresponding Zod `schema.ts`. The `renderTemplate` function automatically validates data and applies defaults before rendering.
 
 ---
 

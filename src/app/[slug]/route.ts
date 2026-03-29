@@ -51,14 +51,9 @@ export async function GET(
     return new Response(underReviewHtml, { headers: { 'content-type': 'text/html' } });
   }
 
-  // Map exact template IDs. Fallback to mapping legacy names if needed.
-  let templateId = site.type;
-  if (site.type === 'ecommerce') templateId = 'ecommerce-v1';
-  if (site.type === 'portfolio') templateId = 'portfolio-v1';
-
-  const html = renderTemplate(templateId, { 
+  const html = renderTemplate(site.type, { 
     name: site.name || slug,
-    type: templateId,
+    type: site.type,
     whatsapp_number: site.whatsapp_number,
     ...site.content,
     WHATSAPP_LINK: getWhatsAppLink(site.whatsapp_number, 'Hi! I want to contact you.')
