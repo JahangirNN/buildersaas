@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase, getURL } from '@/lib/supabase'
 import type { User } from '@supabase/supabase-js'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -36,7 +36,7 @@ export function Navbar(): React.ReactNode {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/` : undefined
+        redirectTo: getURL()
       }
     })
   }

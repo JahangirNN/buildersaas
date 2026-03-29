@@ -18,8 +18,8 @@ export function portfolioV1Template(data: PortfolioData): string {
       const product = p as Record<string, unknown>;
       return `
       <article class="product-card">
-          <div class="product-img-box">
-              <img src="${s(product.image_url || '/templates/portfolio-v1/story_1.jpg')}" alt="${s(product.name)}" loading="lazy" data-field="PRODUCT_${i}_IMAGE">
+          <div class="product-img-box" data-field="PRODUCT_${i}_IMAGE_URL">
+              <img src="${s(product.image_url || '/templates/portfolio-v1/story_1.jpg')}" alt="${s(product.name)}" loading="lazy" style="display:block">
           </div>
           <div class="product-info">
               <span class="product-type">Featured Work</span>
@@ -37,8 +37,8 @@ export function portfolioV1Template(data: PortfolioData): string {
     // Default placeholder product if empty
     productsHtml = `
       <article class="product-card">
-          <div class="product-img-box">
-              <img src="/templates/portfolio-v1/story_1.jpg" alt="Default Work" loading="lazy" data-field="PRODUCT_0_IMAGE">
+          <div class="product-img-box" data-field="PRODUCT_0_IMAGE_URL">
+              <img src="/templates/portfolio-v1/story_1.jpg" alt="Default Work" loading="lazy" style="display:block">
           </div>
           <div class="product-info">
               <h3 class="product-title" data-field="PRODUCT_0_NAME">Sample Work</h3>

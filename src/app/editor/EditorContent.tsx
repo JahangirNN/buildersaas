@@ -124,10 +124,13 @@ function ImageUpload({ value, onChange, label }: { value: string; onChange: (url
 }
 
 /* ─── Collapsible Section ────────────────────────── */
-function Section({ title, icon: Icon, children, defaultOpen = true }: {
-  title: string; icon: React.ElementType; children: React.ReactNode; defaultOpen?: boolean
+function Section({ title, icon: Icon, children, defaultOpen = true, forceOpen = false }: {
+  title: string; icon: React.ElementType; children: React.ReactNode; defaultOpen?: boolean; forceOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen)
+  useEffect(() => {
+    if (forceOpen) setOpen(true)
+  }, [forceOpen])
   return (
     <div className="border-b border-white/5 last:border-0">
       <button
@@ -274,7 +277,10 @@ export default function EditorContent() {
         .from('websites').select('*').eq('slug', editSlug).single()
       if (!error && data) {
         const c = data.content as Record<string, unknown>
-        setTemplateId(normalizeType(data.type))
+        // Prefer TEMPLATE_ID stored in content (set by AI generator for v2/v3/v4)
+        // Fallback to normalizing the DB type column
+        const resolvedTemplateId = (c.TEMPLATE_ID as string) || normalizeType(data.type)
+        setTemplateId(resolvedTemplateId)
         setName(data.slug)
         if (c) {
           setContent(prev => ({ ...prev, ...c }))
@@ -330,16 +336,30 @@ export default function EditorContent() {
 
   // Removed unused useIframeSync hook
 
-  // Sync core discovered fields
+  // Sync all state to iframe seamlessly via postMessage
   useEffect(() => {
     if (!isReadyForSync.current || !iframeRef.current?.contentWindow) return
     const win = iframeRef.current.contentWindow
+    
+    // Top-level fields
+    win.postMessage({ type: 'sf-set-field', field: 'name', value: name }, '*')
+    win.postMessage({ type: 'sf-set-field', field: 'THEME_COLOR', value: themeColor }, '*')
+    win.postMessage({ type: 'sf-set-field', field: 'WHATSAPP_LINK', value: whatsapp ? getWhatsAppLink(whatsapp, 'Hello!') : '#' }, '*')
+
+    // Content fields (Schema-specific)
     Object.entries(content).forEach(([field, value]) => {
       if (field !== 'PRODUCT_LIST') {
         win.postMessage({ type: 'sf-set-field', field, value }, '*')
+      } else if (Array.isArray(value)) {
+        value.forEach((p: any, i: number) => {
+          win.postMessage({ type: 'sf-set-field', field: `PRODUCT_${i}_NAME`, value: p.name || '' }, '*')
+          win.postMessage({ type: 'sf-set-field', field: `PRODUCT_${i}_DESC`, value: p.desc || '' }, '*')
+          win.postMessage({ type: 'sf-set-field', field: `PRODUCT_${i}_PRICE`, value: p.price || '' }, '*')
+          win.postMessage({ type: 'sf-set-field', field: `PRODUCT_${i}_IMAGE_URL`, value: p.image_url || '' }, '*')
+        })
       }
     })
-  }, [content])
+  }, [content, name, themeColor, whatsapp])
   // Listen for inline edits from iframe
   useEffect(() => {
     function handleMessage(e: MessageEvent) {
@@ -588,11 +608,16 @@ export default function EditorContent() {
               <div className="mx-4 mt-3 bg-red-500/10 border border-red-500/20 text-red-300 text-[11px] p-3 rounded-xl font-medium">{errorMsg}</div>
             )}
 
-            {/* Dynamic Template Fields */}
             {discoveredFields.length > 0 && (
-              <Section title="Template Features" icon={Type}>
+              <Section 
+                title="Template Features" 
+                icon={Type}
+                forceOpen={activeField !== null && !activeField.startsWith('PRODUCT_') && activeField !== 'LOGO_URL' && activeField !== 'HERO_BG_IMAGE'}
+              >
                 <div className="space-y-4">
-                  {discoveredFields.filter(f => !f.id.startsWith('PRODUCT_')).map(field => (
+                  {/* Deduplicate fields before rendering to avoid React key collisions */}
+                  {Array.from(new Map(discoveredFields.map(f => [f.id, f])).values())
+                    .filter(f => !f.id.startsWith('PRODUCT_')).map(field => (
                     <div key={field.id} id={`field-${field.id}`}>
                       {field.type === 'image' ? (
                         <ImageUpload 
@@ -615,7 +640,12 @@ export default function EditorContent() {
               </Section>
             )}
 
-            <Section title="Products / Services" icon={ShoppingBag} defaultOpen={false}>
+            <Section 
+              title="Products / Services" 
+              icon={ShoppingBag} 
+              defaultOpen={false}
+              forceOpen={activeField !== null && activeField.startsWith('PRODUCT_')}
+            >
               <div className="space-y-3">
                 {(content.PRODUCT_LIST as Record<string, unknown>[] || []).map((product, i: number) => (
                   <div key={i} id={`field-PRODUCT_${i}`} className="bg-white/5 rounded-xl p-3 border border-white/5 space-y-2.5 relative group scroll-mt-20">
@@ -644,7 +674,12 @@ export default function EditorContent() {
               </div>
             </Section>
 
-            <Section title="Brand Assets" icon={ImageIcon} defaultOpen={false}>
+            <Section 
+              title="Brand Assets" 
+              icon={ImageIcon} 
+              defaultOpen={false}
+              forceOpen={activeField === 'LOGO_URL' || activeField === 'HERO_BG_IMAGE'}
+            >
               <ImageUpload value={content.LOGO_URL as string} onChange={val => updateField('LOGO_URL', val)} label="Logo" />
               <ImageUpload value={content.HERO_BG_IMAGE as string} onChange={val => updateField('HERO_BG_IMAGE', val)} label="Hero Background Image" />
             </Section>

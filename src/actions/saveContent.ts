@@ -10,11 +10,15 @@ export async function saveContentAction(
 ) {
   if (!slug) return { error: 'No slug provided.' }
 
+  let dbType = type;
+  if (dbType.startsWith('portfolio')) dbType = 'portfolio';
+  if (dbType.startsWith('ecommerce')) dbType = 'ecommerce';
+
   const { error } = await supabaseAdmin
     .from('websites')
     .update({
       content,
-      type,
+      type: dbType,
       whatsapp_number,
     })
     .eq('slug', slug)

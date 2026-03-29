@@ -76,7 +76,7 @@ export function getEditorInjectionScript(): string {
     const fields = [];
     document.querySelectorAll('[data-field]').forEach(el => {
       const field = el.getAttribute('data-field');
-      const isImage = el.tagName === 'IMG';
+      const isImage = el.tagName === 'IMG' || field.includes('IMAGE') || field.includes('LOGO');
       fields.push({
         id: field,
         label: getLabel(field),
@@ -113,7 +113,7 @@ export function getEditorInjectionScript(): string {
     clearActive();
 
     const field = target.getAttribute('data-field');
-    const isImage = target.tagName === 'IMG';
+    const isImage = target.tagName === 'IMG' || field.includes('IMAGE') || field.includes('LOGO');
 
     activeEl = target;
     activeEl.classList.add('sf-active');
@@ -186,16 +186,41 @@ export function getEditorInjectionScript(): string {
     if (e.data && e.data.type === 'sf-set-field') {
       const fieldName = e.data.field;
       
+      const isImageField = fieldName.includes('IMAGE') || fieldName.includes('LOGO');
       // CRITICAL FIX: Do NOT update the DOM element if the user is actively typing inside it!
       // Updating innerHTML/textContent destroys the Native Selection/Caret placement.
-      if (activeEl && activeEl.getAttribute('data-field') === fieldName) {
+      // However, we MUST allow updates if the field is an image, because users upload via the sidebar while the image is active.
+      if (!isImageField && activeEl && activeEl.getAttribute('data-field') === fieldName) {
         return; 
       }
 
       const el = document.querySelector('[data-field="' + fieldName + '"]');
       if (el) {
-        if (el.tagName === 'IMG') {
-          el.src = e.data.value;
+        const isImg = el.tagName === 'IMG';
+        const img = isImg ? el : el.querySelector('img');
+        
+        if (img) {
+          img.src = e.data.value;
+          if (e.data.value) {
+            img.style.display = 'block';
+            // If we're updating a child img, hide other placeholder elements in the container
+            if (!isImg) {
+              Array.from(el.children).forEach(child => {
+                if (child !== img) child.style.display = 'none';
+              });
+            }
+          }
+        } else if (isImageField) {
+          // Fallback: Create image if it doesn't exist and we have a value
+          if (e.data.value) {
+            const newImg = document.createElement('img');
+            newImg.src = e.data.value;
+            newImg.style.width = '100%';
+            newImg.style.height = '100%';
+            newImg.style.objectFit = 'cover';
+            el.innerHTML = '';
+            el.appendChild(newImg);
+          }
         } else if (fieldName === 'HERO_HEADLINE') {
           el.innerHTML = e.data.value.replace(/\\\\n/g, '<br>');
         } else {

@@ -74,14 +74,19 @@ All templates must use the format: `[category]-v[version]`
 - **Auto-Scroll UX** — Clicking iframe elements scrolls the corresponding sidebar field into view.
 - **Asset-to-DB Sync** — Uploaded images now correctly update the `content` JSON and persist to Supabase.
 - **Universal Templates** — `portfolio-v1` and `ecommerce-v1` updated to 100% editability standard.
-- **Zod-Powered Registry** — All templates are validated at runtime; automatic defaults and strict type safety ensure a 100% green build.
+- **Zod-Powered Registry** — All templates are validated at runtime; automatic defaults and strict type safety.
+- **Dynamic Auth Redirects** — Using `getURL()` utility for seamless environment-aware Google OAuth flow.
 
 ---
 
-## Supabase Setup
-- **Project URL**: `https://rsabhjpgdfzbbjvkncrm.supabase.co`
-- **Auth Provider**: Google OAuth (must be enabled in Supabase Dashboard → Auth → Providers)
-- **Storage Bucket**: `user-assets` (must be public)
+## Deployment & Auth
+- **URL**: `https://buildersaas.acerdesktop53.workers.dev`
+- **Environment Handling**: 
+  - `NEXT_PUBLIC_SITE_URL` in `wrangler.jsonc` (for production) and `.env.local` (for development).
+  - Use `src/lib/supabase.ts` → `getURL()` for any OAuth redirects.
+- **Auth Configuration**:
+  - **Supabase Dashboard**: Site URL must be the worker/pages URL.
+  - **Google Cloud Console**: Authorized origins must include the worker/pages URL.
 
 ---
 

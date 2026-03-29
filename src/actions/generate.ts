@@ -24,7 +24,11 @@ export async function generateSiteAction(formData: FormData, userId?: string) {
 
   const name = formData.get('name') as string;
   const whatsapp = formData.get('whatsapp') as string;
-  const type = formData.get('type') as string;
+  const templateId = formData.get('type') as string; // Store original template ID
+  let type = templateId;
+  // Denormalize all portfolio/ecommerce variants to satisfy websites_type_check constraint
+  if (type.startsWith('portfolio')) type = 'portfolio';
+  if (type.startsWith('ecommerce')) type = 'ecommerce';
   const bio = formData.get('bio') as string;
   const existingSlug = formData.get('existing_slug') as string | null;
 
@@ -44,28 +48,75 @@ export async function generateSiteAction(formData: FormData, userId?: string) {
       }
     });
 
-    const prompt = `You are an expert copywriter and UI designer. Generate JSON content for a ${type} website based on the user's bio and name.
-You MUST return EXACTLY ONE JSON object and NO markdown formatting or inside quotes that can break parsing. You MUST strictly use these keys:
-{
-  "HERO_HEADLINE": "...", 
+    // Build a type-aware prompt so the AI generates the right field keys
+    const isV2 = type === 'portfolio-v2';
+    const isV3 = type === 'portfolio-v3';
+    const isV4 = type === 'portfolio-v4';
+
+    let schemaBlock = '';
+    if (isV2) {
+      schemaBlock = `{
+  "HERO_HEADLINE": "...",
+  "ROLE_TITLE": "...",
   "SUB_HEADLINE": "...",
   "ABOUT_SECTION": "...",
-  "PRODUCT_LIST": [
-    { 
-      "name": "...", 
-      "desc": "...", 
-      "price": "...", 
-      "image_url": "https://images.unsplash.com/photo-[real-id]?w=600&q=80" 
-    }
-  ],
+  "STAT_1_VAL": "...", "STAT_1_LABEL": "...",
+  "STAT_2_VAL": "...", "STAT_2_LABEL": "...",
+  "STAT_3_VAL": "...", "STAT_3_LABEL": "...",
+  "REVIEW_1_TEXT": "...", "REVIEW_1_AUTHOR": "...",
+  "REVIEW_2_TEXT": "...", "REVIEW_2_AUTHOR": "...",
+  "CTA_PRIMARY_TEXT": "Book a Free Call",
+  "PRODUCT_LIST": [{ "name": "...", "desc": "...", "price": "₹..." }],
+  "THEME_COLOR": "#6366f1"
+}`;
+    } else if (isV3) {
+      schemaBlock = `{
+  "HERO_HEADLINE": "...",
+  "TAGLINE": "...",
+  "SUB_HEADLINE": "...",
+  "ABOUT_SECTION": "...",
+  "STAT_1_VAL": "...", "STAT_1_LABEL": "...",
+  "STAT_2_VAL": "...", "STAT_2_LABEL": "...",
+  "STAT_3_VAL": "...", "STAT_3_LABEL": "...",
+  "CTA_PRIMARY_TEXT": "Start a Project",
+  "PRODUCT_LIST": [{ "name": "...", "desc": "...", "price": "View", "image_url": "https://images.unsplash.com/photo-[real-id]?w=800&q=80" }],
+  "THEME_COLOR": "#1a1a1a"
+}`;
+    } else if (isV4) {
+      schemaBlock = `{
+  "HERO_HEADLINE": "...",
+  "ROLE_TITLE": "...",
+  "SUB_HEADLINE": "...",
+  "ABOUT_SECTION": "...",
+  "STACK_TAGS": "TypeScript, React, Node.js, ...",
+  "STAT_1_VAL": "...", "STAT_1_LABEL": "Years Coding",
+  "STAT_2_VAL": "...", "STAT_2_LABEL": "GitHub Stars",
+  "STAT_3_VAL": "...", "STAT_3_LABEL": "OSS Projects",
+  "CTA_PRIMARY_TEXT": "Hire Me",
+  "PRODUCT_LIST": [{ "name": "...", "desc": "...", "price": "Open Source" }],
+  "THEME_COLOR": "#22d3ee"
+}`;
+    } else {
+      // Default (portfolio-v1 / ecommerce-v1)
+      schemaBlock = `{
+  "HERO_HEADLINE": "...",
+  "SUB_HEADLINE": "...",
+  "ABOUT_SECTION": "...",
+  "PRODUCT_LIST": [{ "name": "...", "desc": "...", "price": "...", "image_url": "https://images.unsplash.com/photo-[real-id]?w=600&q=80" }],
   "THEME_COLOR": "#HEXCODE"
-}
+}`;
+    }
 
-Important Rules:
-1. Provide EXACTLY 6 items in the PRODUCT_LIST array (so the user has backups if an image breaks).
-2. For image_url, you MUST use REAL, valid Unsplash photo IDs from your training data (e.g. photos of aesthetics, products, nature). NEVER use generic placeholders like picsum. Use format: https://images.unsplash.com/photo-[real-id]?w=600&q=80
-3. Replace linebreaks in headlines with \\n.
-4. Keep descriptions short and compelling.
+    const prompt = `You are an expert copywriter. Generate JSON content for a ${type} website.
+Return EXACTLY ONE JSON object with NO markdown code blocks. Use ONLY these keys:
+${schemaBlock}
+
+Rules:
+1. PRODUCT_LIST must have EXACTLY 6 items.
+2. For image_url fields, use REAL valid Unsplash photo IDs. Format: https://images.unsplash.com/photo-[real-id]?w=600&q=80
+3. Use \\n for linebreaks inside headlines.
+4. Write compelling, professional copy tailored to the business.
+5. THEME_COLOR should match the industry (e.g. creative = warm, tech = blue/cyan).
 
 Name: ${name}
 Bio: ${bio}
@@ -82,13 +133,15 @@ Type: ${type}`;
     }
 
     // 2. Save to Supabase using Admin client
+    // Inject the exact template ID into content so we can recover it on load
+    const contentToSave = { ...generatedContent, TEMPLATE_ID: templateId };
     const { data: siteRecord, error: dbError } = await supabaseAdmin
       .from('websites')
       .upsert({
         slug,
         type,
         whatsapp_number: whatsapp,
-        content: generatedContent,
+        content: contentToSave,
         is_paid: false,
         user_id: userId || null
       }, { onConflict: 'slug' })
