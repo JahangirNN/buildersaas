@@ -74,6 +74,7 @@ All templates must use the format: `[category]-v[version]`
 - **Auto-Scroll UX** — Clicking iframe elements scrolls the corresponding sidebar field into view.
 - **Asset-to-DB Sync** — Uploaded images now correctly update the `content` JSON and persist to Supabase.
 - **Universal Templates** — `portfolio-v1` and `ecommerce-v1` updated to 100% editability standard.
+- **Zod-Powered Registry** — All templates are validated at runtime; automatic defaults and strict type safety ensure a 100% green build.
 
 ---
 
@@ -87,7 +88,7 @@ All templates must use the format: `[category]-v[version]`
 ## Roadmap / Next Steps
 1. **Phase 4**: Import Roameo (`city-v1`) as a gold-standard reference for the new workflow.
 2. **Phase 5**: Advanced Layout controls (ordering sections, adding/removing products).
-3. **Phase 6**: Payment gating & Live "Publish" flow.
+3. **Phase 6**: Stripe Payment gating & Live "Publish" flow.
 
 ---
 
