@@ -105,7 +105,7 @@ export default function TemplateGallery() {
         <div className="mt-16 rounded-[2.5rem] border-2 border-dashed border-gray-200 bg-white/50 p-16 text-center transition-colors hover:bg-white">
           <p className="text-4xl mb-4 animate-bounce text-gray-300">🪄</p>
           <h3 className="text-2xl font-black text-gray-700 mb-2 tracking-tight">More templates en route</h3>
-          <p className="text-gray-500 text-base font-medium">We're digitizing highly-converting client sites into scalable templates weekly.</p>
+          <p className="text-gray-500 text-base font-medium">We&apos;re digitizing highly-converting client sites into scalable templates weekly.</p>
         </div>
       </div>
     </main>

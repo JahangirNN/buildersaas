@@ -73,8 +73,9 @@ function ImageUpload({ value, onChange, label }: { value: string; onChange: (url
       } else {
         alert(data.error || 'Upload failed')
       }
-    } catch (err: any) {
-      alert('Upload failed: ' + err.message)
+    } catch (err: unknown) {
+      const error = err as Error;
+      alert('Upload failed: ' + error.message)
     } finally {
       setUploading(false)
     }
@@ -160,12 +161,7 @@ function Field({ label, value, onChange, multiline, placeholder, rows }: {
 }
 
 /* ─── Types ────────────────────────── */
-interface ProductItem {
-  name: string
-  desc: string
-  price: string
-  image_url: string
-}
+// Removed unused ProductItem interface
 
 /* ═══════════════════════════════════════════════════
    MAIN EDITOR COMPONENT
@@ -179,7 +175,7 @@ export default function EditorContent() {
   const [initialLoading, setInitialLoading] = useState(!!editSlug)
 
   // Content state (Unified object to handle any template field)
-  const [content, setContent] = useState<Record<string, any>>({
+  const [content, setContent] = useState<Record<string, unknown>>({
     HERO_HEADLINE: 'Crafting worlds\\nbetween reality\\n& imagination.',
     SUB_HEADLINE: 'Award-winning creative director specializing in brand identity and visual storytelling.',
     ABOUT_SECTION: 'With over a decade of experience in design and creative direction, I transform complex ideas into compelling visual narratives.',
@@ -332,12 +328,7 @@ export default function EditorContent() {
     }
   }, [initialLoading])
 
-  const useIframeSync = (field: string, value: any) => {
-    useEffect(() => {
-      if (!isReadyForSync.current || !iframeRef.current?.contentWindow) return
-      iframeRef.current.contentWindow.postMessage({ type: 'sf-set-field', field, value }, '*')
-    }, [value, field])
-  }
+  // Removed unused useIframeSync hook
 
   // Sync core discovered fields
   useEffect(() => {
@@ -439,7 +430,7 @@ export default function EditorContent() {
     setContent(prev => {
       const next = { ...prev }
       if (next.PRODUCT_LIST && Array.isArray(next.PRODUCT_LIST)) {
-        next.PRODUCT_LIST = next.PRODUCT_LIST.map((p: any, idx: number) => 
+        next.PRODUCT_LIST = next.PRODUCT_LIST.map((p: Record<string, unknown>, idx: number) => 
           idx === i ? { ...p, [field]: value } : p
         )
       }
@@ -626,22 +617,22 @@ export default function EditorContent() {
 
             <Section title="Products / Services" icon={ShoppingBag} defaultOpen={false}>
               <div className="space-y-3">
-                {(content.PRODUCT_LIST || []).map((product: any, i: number) => (
+                {(content.PRODUCT_LIST as Record<string, unknown>[] || []).map((product, i: number) => (
                   <div key={i} id={`field-PRODUCT_${i}`} className="bg-white/5 rounded-xl p-3 border border-white/5 space-y-2.5 relative group scroll-mt-20">
                     <button
-                      onClick={() => setContent(prev => ({ ...prev, PRODUCT_LIST: prev.PRODUCT_LIST.filter((_: any, idx: number) => idx !== i) }))}
+                      onClick={() => setContent(prev => ({ ...prev, PRODUCT_LIST: (prev.PRODUCT_LIST as Record<string, unknown>[] || []).filter((_, idx: number) => idx !== i) }))}
                       className="absolute top-2 right-2 p-1 rounded-md text-white/20 hover:text-red-400 hover:bg-red-500/10 transition opacity-0 group-hover:opacity-100"
                     >
                       <Trash2 size={12} />
                     </button>
                     <div className="text-[10px] font-bold text-white/30 uppercase tracking-wider">Product {i + 1}</div>
-                    <input value={product.name} onChange={e => updateProduct(i, 'name', e.target.value)}
+                    <input value={product.name as string} onChange={e => updateProduct(i, 'name', e.target.value)}
                       className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white/90 outline-none focus:border-blue-500/50 placeholder-white/25" placeholder="Product name" />
-                    <textarea value={product.desc} onChange={e => updateProduct(i, 'desc', e.target.value)} rows={2}
+                    <textarea value={product.desc as string} onChange={e => updateProduct(i, 'desc', e.target.value)} rows={2}
                       className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white/90 outline-none focus:border-blue-500/50 resize-none placeholder-white/25" placeholder="Description" />
-                    <input value={product.price} onChange={e => updateProduct(i, 'price', e.target.value)}
+                    <input value={product.price as string} onChange={e => updateProduct(i, 'price', e.target.value)}
                       className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white/90 outline-none focus:border-blue-500/50 placeholder-white/25" placeholder="₹ Price" />
-                    <ImageUpload value={product.image_url} onChange={url => updateProduct(i, 'image_url', url)} label="Product Image" />
+                    <ImageUpload value={product.image_url as string} onChange={url => updateProduct(i, 'image_url', url)} label="Product Image" />
                   </div>
                 ))}
                 <button

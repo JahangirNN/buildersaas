@@ -1,18 +1,20 @@
 export interface TemplateData {
-  [key: string]: any;
+  [key: string]: string | number | boolean | any[] | undefined | Record<string, any>;
 }
 
+const s = (v: unknown): string => String(v || '');
+
 export function ecommerceV1Template(data: TemplateData): string {
-  const themeColor = data.THEME_COLOR || '#10b981'; // Green for nature theme
-  const heroHeadline = data.HERO_HEADLINE || 'Handcrafted\\n<em>with Herbs</em>\\n& Nature';
-  const subHeadline = data.SUB_HEADLINE || 'Pure care for your hair & skin — free from harsh chemicals, made with love from the finest Indian herbs.';
-  const aboutSection = data.ABOUT_SECTION || 'At Abrra, we believe nature has all the answers. Our products are lovingly handcrafted using time-honoured Indian herbal traditions — every ingredient chosen for its purity and potency.';
-  const whatsappLink = data.WHATSAPP_LINK || 'https://wa.me/919920355666?text=Hello%20Nature%20Products!%20I%20would%20like%20to%20place%20an%20order.';
-  const contactPhone = data.CONTACT_PHONE || '+91 99203 55666';
-  const instagramLink = data.INSTAGRAM_LINK || 'https://www.instagram.com/abrra.natureproducts';
-  const name = data.name || 'Abrra Nature Products';
-  const logoUrl = data.LOGO_URL || '/templates/ecommerce-v1/assets/logo.png';
-  const heroBg = data.HERO_BG_IMAGE || '/templates/ecommerce-v1/assets/gallery1_new.png';
+  const themeColor = s(data.THEME_COLOR || '#10b981');
+  const heroHeadline = s(data.HERO_HEADLINE || 'Handcrafted\\n<em>with Herbs</em>\\n& Nature');
+  const subHeadline = s(data.SUB_HEADLINE || 'Pure care for your hair & skin — free from harsh chemicals, made with love from the finest Indian herbs.');
+  const aboutSection = s(data.ABOUT_SECTION || 'At Abrra, we believe nature has all the answers. Our products are lovingly handcrafted using time-honoured Indian herbal traditions — every ingredient chosen for its purity and potency.');
+  const whatsappLink = s(data.WHATSAPP_LINK || 'https://wa.me/919920355666?text=Hello%20Nature%20Products!%20I%20would%20like%20to%20place%20an%20order.');
+  const contactPhone = s(data.CONTACT_PHONE || '+91 99203 55666');
+  const instagramLink = s(data.INSTAGRAM_LINK || 'https://www.instagram.com/abrra.natureproducts');
+  const name = s(data.name || 'Abrra Nature Products');
+  const logoUrl = s(data.LOGO_URL || '/templates/ecommerce-v1/assets/logo.png');
+  const heroBg = s(data.HERO_BG_IMAGE || '/templates/ecommerce-v1/assets/gallery1_new.png');
 
   let productsHtml = '';
   if (data.PRODUCT_LIST && Array.isArray(data.PRODUCT_LIST) && data.PRODUCT_LIST.length > 0) {
@@ -145,7 +147,7 @@ export function ecommerceV1Template(data: TemplateData): string {
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-4H7l5-8v4h4l-5 8z" fill="currentColor"/></svg>
           100% Natural &amp; Handcrafted
         </div>
-        <h1 class="hero-title" data-field="HERO_HEADLINE">${heroHeadline.replace(/\\n/g, '<br/>')}</h1>
+        <h1 class="hero-title" data-field="HERO_HEADLINE">${s(heroHeadline).replace(/\\n/g, '<br/>')}</h1>
         <p class="hero-sub" data-field="SUB_HEADLINE">${subHeadline}</p>
         <div class="hero-actions">
           <a href="${whatsappLink}" class="btn-cta" target="_blank" rel="noopener">
@@ -303,7 +305,7 @@ export function ecommerceV1Template(data: TemplateData): string {
                   <span class="ci-val">Message Us</span>
                 </div>
               </a>
-              <a href="tel:${contactPhone.replace(/\\s+/g, '')}" class="contact-item">
+              <a href="tel:${contactPhone.replace(/\s+/g, '')}" class="contact-item">
                 <div class="ci-icon ph-icon">
                   <svg viewBox="0 0 24 24" width="22" height="22" fill="none"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.9 12.5a19.79 19.79 0 01-3-8.57A2 2 0 012.88 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L7.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </div>

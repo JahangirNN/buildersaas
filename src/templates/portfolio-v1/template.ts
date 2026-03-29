@@ -1,15 +1,17 @@
 export interface TemplateData {
-  [key: string]: any;
+  [key: string]: string | number | boolean | any[] | undefined | Record<string, any>;
 }
+
+const s = (v: unknown): string => String(v || '');
 
 export function portfolioV1Template(data: TemplateData): string {
   // Destructure with fallbacks
-  const themeColor = data.THEME_COLOR || '#CA8A04';
-  const heroHeadline = data.HERO_HEADLINE || 'Welcome to my world.';
-  const subHeadline = data.SUB_HEADLINE || 'Discover the best works.';
-  const aboutSection = data.ABOUT_SECTION || 'An expert in my field.';
-  const whatsappLink = data.WHATSAPP_LINK || '#';
-  const name = data.name || 'Portfolio';
+  const themeColor = s(data.THEME_COLOR || '#CA8A04');
+  const heroHeadline = s(data.HERO_HEADLINE || 'Welcome to my world.');
+  const subHeadline = s(data.SUB_HEADLINE || 'Discover the best works.');
+  const aboutSection = s(data.ABOUT_SECTION || 'An expert in my field.');
+  const whatsappLink = s(data.WHATSAPP_LINK || '#');
+  const name = s(data.name || 'Portfolio');
 
   // Build the product list HTML dynamically
   let productsHtml = '';
@@ -77,7 +79,7 @@ export function portfolioV1Template(data: TemplateData): string {
     <!-- Navigation -->
     <nav>
         <div class="nav-wrapper container">
-            <div class="nav-logo" data-field="LOGO_TEXT">${name.toUpperCase()}.</div>
+            <div class="nav-logo" data-field="LOGO_TEXT">${s(data.LOGO_TEXT || name).toUpperCase()}.</div>
             <div class="nav-links">
                 <a href="#books">Works</a>
                 <a href="#about">Philosophy</a>
@@ -169,7 +171,7 @@ export function portfolioV1Template(data: TemplateData): string {
     </main>
 
     <footer class="container reveal">
-        <h4 style="font-family:var(--heading-font); letter-spacing:-0.05em;" data-field="FOOTER_LOGO">${name.toUpperCase()}.</h4>
+        <h4 style="font-family:var(--heading-font); letter-spacing:-0.05em;" data-field="FOOTER_LOGO">${s(data.FOOTER_LOGO || name).toUpperCase()}.</h4>
         <div class="foot-links">
             <a href="#books">Works</a> &middot; 
             <a href="${whatsappLink}">Contact</a> &middot; 

@@ -35,8 +35,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: publicUrl })
 
-  } catch (err: any) {
-    console.error('Upload API Exception:', err)
-    return NextResponse.json({ error: err.message || 'Internal error' }, { status: 500 })
+  } catch (err: unknown) {
+    const error = err as Error;
+    console.error('Upload API Exception:', error)
+    return NextResponse.json({ error: error.message || 'Internal error' }, { status: 500 })
   }
 }

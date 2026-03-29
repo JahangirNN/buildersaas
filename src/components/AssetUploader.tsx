@@ -39,8 +39,9 @@ export function AssetUploader({ onUploadComplete }: { onUploadComplete: (url: st
         .getPublicUrl(filePath)
 
       onUploadComplete(data.publicUrl)
-    } catch (err: any) {
-      setErrorMSG('Upload failed: ' + err.message)
+    } catch (err: unknown) {
+      const error = err as Error;
+      setErrorMSG('Upload failed: ' + error.message)
     } finally {
       setUploading(false)
     }

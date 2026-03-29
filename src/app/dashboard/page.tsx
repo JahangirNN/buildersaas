@@ -12,7 +12,7 @@ interface UserSite {
   slug: string
   type: string
   created_at: string
-  content: any
+  content: Record<string, unknown>
 }
 
 export default function DashboardPage() {
@@ -99,7 +99,7 @@ export default function DashboardPage() {
               <Layout size={32} className="text-gray-300" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">No sites found</h3>
-            <p className="text-gray-500 mb-8 max-w-xs mx-auto">You haven't generated any websites yet. Pick a template to get started.</p>
+            <p className="text-gray-500 mb-8 max-w-xs mx-auto">You haven&apos;t generated any websites yet. Pick a template to get started.</p>
             <Link href="/templates" className="text-black font-bold border-b-2 border-black pb-1 hover:opacity-70 transition">Browse Templates →</Link>
           </div>
         ) : (
