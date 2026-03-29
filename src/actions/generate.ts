@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { supabaseAdmin } from '@/lib/supabase'
 import { getCloudflareContext } from '@opennextjs/cloudflare'
 
-export async function generateSiteAction(formData: FormData) {
+export async function generateSiteAction(formData: FormData, userId?: string) {
   // In Cloudflare Workers, secrets live on the env binding, not process.env.
   // getCloudflareContext({async:true}) is the correct way to access them in Server Actions.
   let apiKey = process.env.GEMINI_API_KEY;
@@ -13,7 +13,7 @@ export async function generateSiteAction(formData: FormData) {
     try {
       const ctx = await getCloudflareContext({ async: true });
       apiKey = (ctx.env as Record<string, string>).GEMINI_API_KEY;
-    } catch (_e) {
+    } catch {
     }
   }
 
@@ -26,12 +26,14 @@ export async function generateSiteAction(formData: FormData) {
   const whatsapp = formData.get('whatsapp') as string;
   const type = formData.get('type') as string;
   const bio = formData.get('bio') as string;
+  const existingSlug = formData.get('existing_slug') as string | null;
 
   if (!name || !whatsapp || !type || !bio) {
     return { error: 'All fields are required.' };
   }
 
-  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+  // Use existing slug if editing, otherwise generate new from name
+  const slug = existingSlug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
   try {
     // 1. Generate Content via Gemini
@@ -42,29 +44,32 @@ export async function generateSiteAction(formData: FormData) {
       }
     });
 
-    const prompt = `You are a content strategist. Based on the user's bio and site type (${type}), generate a website structure. Return ONLY JSON matching this exact structure:
+    const prompt = `You are an expert copywriter and UI designer. Generate JSON content for a ${type} website based on the user's bio and name.
+You MUST return EXACTLY ONE JSON object and NO markdown formatting or inside quotes that can break parsing. You MUST strictly use these keys:
 {
-  "hero": { 
-    "headline": "...", 
-    "subheadline": "...",
-    "image_url": "https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=800&q=80" 
-  },
-  "about": "...",
-  "items": [
+  "HERO_HEADLINE": "...", 
+  "SUB_HEADLINE": "...",
+  "ABOUT_SECTION": "...",
+  "PRODUCT_LIST": [
     { 
       "name": "...", 
       "desc": "...", 
-      "price": "₹...", 
-      "image_url": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80" 
+      "price": "...", 
+      "image_url": "https://images.unsplash.com/photo-[real-id]?w=600&q=80" 
     }
   ],
-  "theme_color": "#HEXCODE"
+  "THEME_COLOR": "#HEXCODE"
 }
 
-Rule: Instruct Gemini to use realistic, generic Unsplash image URLs based on the user's business type, and return a strict price (like ₹999 or "Custom") instead of a fake URL.
+Important Rules:
+1. Provide EXACTLY 6 items in the PRODUCT_LIST array (so the user has backups if an image breaks).
+2. For image_url, you MUST use REAL, valid Unsplash photo IDs from your training data (e.g. photos of aesthetics, products, nature). NEVER use generic placeholders like picsum. Use format: https://images.unsplash.com/photo-[real-id]?w=600&q=80
+3. Replace linebreaks in headlines with \\n.
+4. Keep descriptions short and compelling.
 
-User Bio: ${bio}
-Business/Person Name: ${name}`;
+Name: ${name}
+Bio: ${bio}
+Type: ${type}`;
 
     const result = await model.generateContent(prompt);
     const responseText = result.response.text();
@@ -79,13 +84,14 @@ Business/Person Name: ${name}`;
     // 2. Save to Supabase using Admin client
     const { data: siteRecord, error: dbError } = await supabaseAdmin
       .from('websites')
-      .insert({
+      .upsert({
         slug,
         type,
         whatsapp_number: whatsapp,
         content: generatedContent,
-        is_paid: false
-      })
+        is_paid: false,
+        user_id: userId || null
+      }, { onConflict: 'slug' })
       .select()
       .single();
 
